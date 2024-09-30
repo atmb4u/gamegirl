@@ -34,6 +34,10 @@ This project is a generative story game that uses OpenAI's GPT-4o to create an i
     ```sh
     python gamegirl.py
     ```
+2. Load previous stories:
+    ```sh
+    python gamegirl --file <story_n.gsg>
+    ```
 
 ## Project Structure
 
