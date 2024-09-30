@@ -87,7 +87,6 @@ class GenerativeStoryGame:
             List[str]: A list of generated options.
         """
         prompt = initial_options_prompt(context, option)
-        print(f"Initial Choice Prompt length: {len(prompt)}")
         response = self.client.beta.chat.completions.parse(
             model="gpt-4o-2024-08-06",
             messages=[{"role": "user", "content": prompt}],
@@ -105,7 +104,6 @@ class GenerativeStoryGame:
             List[str]: A list of generated choices.
         """
         prompt = choices_prompt(self.memory_manager)
-        # print(f"Choice Prompt length: {len(prompt)}")
         response = self.client.beta.chat.completions.parse(
             model="gpt-4o-2024-08-06",
             messages=[{"role": "user", "content": prompt}],
@@ -144,7 +142,6 @@ class GenerativeStoryGame:
             Tuple[str, str]: The simulated consequence.
         """
         prompt = consequence_prompt(self.memory_manager, choice)
-        # print(f"Consequence Prompt length: {len(prompt)}")
         response = self.client.beta.chat.completions.parse(
             model="gpt-4o-2024-08-06",
             messages=[{"role": "user", "content": prompt}],
