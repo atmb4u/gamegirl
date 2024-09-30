@@ -48,3 +48,15 @@ This project is a generative story game that uses OpenAI's GPT-4o to create an i
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+
+## Wishlist
+
+[x] User-supplied next action
+[x] Plot summary
+[x] Question-Answering
+[x] Memory
+[] Web UI
+[] Open-ended agent
+[] Image generation
+[] Local model support
