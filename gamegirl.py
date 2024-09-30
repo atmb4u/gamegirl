@@ -1,3 +1,26 @@
+"""
+gamegirl.py
+
+This file contains the main class `GenerativeStoryGame` which manages the game flow, interactions with the OpenAI API, and memory management for the generative story game.
+
+Classes:
+    - GenerativeStoryGame: Manages the game flow, interactions with the OpenAI API, and memory management.
+
+Functions:
+    - __init__: Initializes the game, OpenAI client, and memory manager.
+    - generate_initial_options: Generates initial options for the game based on context and option type.
+    - generate_choices: Generates choices for the next stage of the story.
+    - handle_player_question: Handles player questions and generates answers.
+    - simulate_consequence: Simulates the consequence of a player's choice.
+    - process_consequence: Processes the consequence of a player's choice and updates the memory.
+    - save_story_memory: Saves the current story memory to a file.
+    - load_story_memory: Loads the story memory from a file.
+    - get_user_input: Gets user input from the console.
+    - choose_option: Allows the player to choose an option for character, setting, or motivation.
+    - get_next_story_number: Gets the next available story number for saving the game.
+    - play: Starts the game and manages the main game loop.
+"""
+
 import openai
 from typing import List, Tuple
 import json
@@ -5,12 +28,41 @@ import argparse
 import os
 import pickle
 from memory import MemoryManager
-from base import Choice, Choices, Consequence, Answer
-from prompts import initial_options_prompt, choices_prompt, player_question_prompt, consequence_prompt
+from base import (
+    Choice, Choices, Consequence, Answer
+)
+from prompts import (
+    initial_options_prompt, choices_prompt,
+    player_question_prompt, consequence_prompt
+)
 
 
 class GenerativeStoryGame:
+    """
+    Manages the game flow, interactions with the OpenAI API, and memory management.
+
+    Attributes:
+        client (openai.OpenAI): The OpenAI client for API interactions.
+        memory_manager (MemoryManager): Manages the game memory.
+        default_filename (str): The default filename for saving the game.
+
+    Methods:
+        __init__: Initializes the game, OpenAI client, and memory manager.
+        generate_initial_options: Generates initial options for the game based on context and option type.
+        generate_choices: Generates choices for the next stage of the story.
+        handle_player_question: Handles player questions and generates answers.
+        simulate_consequence: Simulates the consequence of a player's choice.
+        process_consequence: Processes the consequence of a player's choice and updates the memory.
+        save_story_memory: Saves the current story memory to a file.
+        load_story_memory: Loads the story memory from a file.
+        get_user_input: Gets user input from the console.
+        choose_option: Allows the player to choose an option for character, setting, or motivation.
+        get_next_story_number: Gets the next available story number for saving the game.
+        play: Starts the game and manages the main game loop.
+    """
+
     def __init__(self):
+        """Initializes the game, OpenAI client, and memory manager."""
         self.client = openai.OpenAI()  # Initialize the OpenAI client
         self.memory_manager = MemoryManager()
         self.memory_manager.write("story_memory", {
@@ -24,6 +76,16 @@ class GenerativeStoryGame:
         })
 
     def generate_initial_options(self, context: str, option: str) -> List[str]:
+        """
+        Generates initial options for the game based on context and option type.
+
+        Args:
+            context (str): The context for generating options.
+            option (str): The type of option to generate (e.g., character, setting).
+
+        Returns:
+            List[str]: A list of generated options.
+        """
         prompt = initial_options_prompt(context, option)
         print(f"Initial Choice Prompt length: {len(prompt)}")
         response = self.client.beta.chat.completions.parse(
@@ -36,6 +98,12 @@ class GenerativeStoryGame:
         return choices
 
     def generate_choices(self) -> List[str]:
+        """
+        Generates choices for the next stage of the story.
+
+        Returns:
+            List[str]: A list of generated choices.
+        """
         prompt = choices_prompt(self.memory_manager)
         # print(f"Choice Prompt length: {len(prompt)}")
         response = self.client.beta.chat.completions.parse(
@@ -47,6 +115,15 @@ class GenerativeStoryGame:
         return options
 
     def handle_player_question(self, question: str) -> str:
+        """
+        Handles player questions and generates answers.
+
+        Args:
+            question (str): The player's question.
+
+        Returns:
+            str: The generated answer.
+        """
         prompt = player_question_prompt(self.memory_manager, question)
         response = self.client.beta.chat.completions.parse(
             model="gpt-4o-2024-08-06",
@@ -57,6 +134,15 @@ class GenerativeStoryGame:
         return answer.get("answer", "")
 
     def simulate_consequence(self, choice: str) -> Tuple[str, str]:
+        """
+        Simulates the consequence of a player's choice.
+
+        Args:
+            choice (str): The player's choice.
+
+        Returns:
+            Tuple[str, str]: The simulated consequence.
+        """
         prompt = consequence_prompt(self.memory_manager, choice)
         # print(f"Consequence Prompt length: {len(prompt)}")
         response = self.client.beta.chat.completions.parse(
@@ -68,6 +154,13 @@ class GenerativeStoryGame:
         return consequence
 
     def process_consequence(self, turn: int, chosen_action: str):
+        """
+        Processes the consequence of a player's choice and updates the memory.
+
+        Args:
+            turn (int): The current turn number.
+            chosen_action (str): The player's chosen action.
+        """
         consequence = self.simulate_consequence(chosen_action)
         actions = self.memory_manager.read("actions")
         actions.append({
@@ -81,6 +174,12 @@ class GenerativeStoryGame:
         self.save_story_memory(self.default_filename)
 
     def save_story_memory(self, filename: str):
+        """
+        Saves the current story memory to a file.
+
+        Args:
+            filename (str): The filename to save the memory to.
+        """
         with open(filename, 'wb') as file:
             pickle.dump({
                 'memory': self.memory_manager.memory,
@@ -89,6 +188,12 @@ class GenerativeStoryGame:
             }, file, protocol=pickle.HIGHEST_PROTOCOL)
 
     def load_story_memory(self, filename: str):
+        """
+        Loads the story memory from a file.
+
+        Args:
+            filename (str): The filename to load the memory from.
+        """
         with open(filename, 'rb') as file:
             data = pickle.load(file)
             self.memory_manager.memory = data['memory']
@@ -96,6 +201,15 @@ class GenerativeStoryGame:
             self.memory_manager.version = data['version']
 
     def get_user_input(self, prompt: str) -> str:
+        """
+        Gets user input from the console.
+
+        Args:
+            prompt (str): The prompt to display to the user.
+
+        Returns:
+            str: The user's input.
+        """
         user_input = input(prompt)
         if user_input.lower() == 'q':
             print("Thank you for playing GameGirl!")
@@ -103,6 +217,16 @@ class GenerativeStoryGame:
         return user_input
 
     def choose_option(self, context: str, option_type: str) -> str:
+        """
+        Allows the player to choose an option for character, setting, or motivation.
+
+        Args:
+            context (str): The context for generating options.
+            option_type (str): The type of option to choose (e.g., character, setting).
+
+        Returns:
+            str: The chosen option.
+        """
         options = self.generate_initial_options(context, option_type)
         print(f"\nChoose your {option_type}:")
         for i, option in enumerate(options, 1):
@@ -114,13 +238,20 @@ class GenerativeStoryGame:
         if choice in ["1", "2", "3"]:
             chosen_option = Choice(emoji=options[int(choice) - 1].get("emoji", ""),
                                     name=options[int(choice) - 1].get("name", ""),
-                                    choice=options[int(choice) - 1].get("choice", ""))
+                                    choice=options[int(choice) - 1].get("choice", ""),
+                                    choice_type=options[int(choice) - 1].get("choice_type", ""))
         else:
             chosen_option = Choice(emoji="", name="", choice=choice)
         self.memory_manager.write(option_type, chosen_option)
         return chosen_option
 
     def get_next_story_number(self):
+        """
+        Gets the next available story number for saving the game.
+
+        Returns:
+            int: The next available story number.
+        """
         existing_files = [f for f in os.listdir() if f.startswith("story_") and f.endswith(".gsg")]
         if not existing_files:
             return 1
@@ -128,6 +259,12 @@ class GenerativeStoryGame:
         return max(numbers) + 1
 
     def play(self, filename: str = None):
+        """
+        Starts the game and manages the main game loop.
+
+        Args:
+            filename (str, optional): The filename to load the story memory from. Defaults to None.
+        """
         self.default_filename = filename or f"story_{self.get_next_story_number()}.gsg"
         if filename:
             self.load_story_memory(filename)
