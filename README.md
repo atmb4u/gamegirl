@@ -52,11 +52,11 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Wishlist
 
-[x] User-supplied next action
-[x] Plot summary
-[x] Question-Answering
-[x] Memory
-[] Web UI
-[] Open-ended agent
-[] Image generation
-[] Local model support
+- [x] User-supplied next action
+- [x] Plot summary
+- [x] Question-Answering
+- [x] Memory
+- [ ] Web UI
+- [ ] Open-ended agent
+- [ ] Image generation
+- [ ] Local model support
