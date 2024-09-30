@@ -5,7 +5,7 @@
 This project is a generative story game that uses OpenAI's GPT-4o to create an interactive storytelling experience. The game allows players to make choices that influence the story, ask questions, and see the consequences of their actions.
 
 ## Demo
-![](demo/gamegirl_demo.mp4)
+![](demo/gamegirl_demo.gif)
 
 ## Basics
 
